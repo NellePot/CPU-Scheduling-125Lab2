@@ -1,17 +1,10 @@
-#Compiler and Compiler flags 
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 
+CFLAGS = -Wall -Iinclude
+SRC = src/main.c src/fcfs.c src/utils.c src/gantt.c src/metrics.c
+TARGET = schedsim
 
-# Name of the output executable
-TARGET = mysh 
+all:
+	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
-# Builds the shell 
-all: $(TARGET)
-
-# Build rule for the shell executable 
-$(TARGET): main.c 
-	$(CC) $(CFLAGS) main.c -o $(TARGET) 
-
-# Removes generated files  
 clean:
 	rm -f $(TARGET)
