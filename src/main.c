@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
-#include "scheduler.h"
+#include "../include/scheduler.h"
 
 int main() {
     int n = 3; 
@@ -28,11 +28,11 @@ int main() {
 
     schedule_fcfs(&state);
 
-    print_gantt_chart(&state);
+    //print_gantt_chart(&state);
     calculate_and_print_metrics(&state);
 
     free(state.processes);
     free(state.gantt_chart);
 
     return 0;
-}
+} 

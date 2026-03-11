@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "scheduler.h"
+#include "../include/scheduler.h"
 
 void calculate_metrics(Process *processes, int n) {
     for (int i = 0; i < n; i++) {
