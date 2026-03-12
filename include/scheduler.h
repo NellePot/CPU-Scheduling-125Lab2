@@ -3,6 +3,24 @@
 
 #include "process.h" 
 
+typedef struct Node {
+    Process *process;
+    struct Node *next;
+} Node;
+
+typedef struct {
+    Node *front;
+    Node *rear;
+} Queue;
+
+typedef struct {
+    Process *processes;     
+    int num_processes;      
+    int current_time;       
+    int *gantt_chart;
+    int total_time;       
+} SchedulerState; 
+
 typedef struct {
     int level;              // Queue priority level (0 = highest)
     int time_quantum;       // Time slice for this queue (-1 for FCFS)
@@ -17,3 +35,20 @@ typedef struct {
     int boost_period;       // Period for priority boost (S)
     int last_boost;         // Last boost time
 } MLFQScheduler;
+
+void initialize_queue(Queue *q);
+void enqueue(Queue *q, Process *p);
+Process* dequeue(Queue *q);
+int is_empty(Queue *q);
+
+int schedule_fcfs(SchedulerState *state);
+int schedule_sjf(SchedulerState *state);
+int schedule_stcf(SchedulerState *state);
+int schedule_rr(SchedulerState *state, int quantum);
+int schedule_mlfq(SchedulerState *state, MLFQScheduler *config); 
+void print_gantt_chart(SchedulerState *state);
+void calculate_metrics(Process *processes, int n);
+double calculate_average_turnaround(Process *processes, int n);
+void calculate_and_print_metrics(SchedulerState *state);
+
+#endif
