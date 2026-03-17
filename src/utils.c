@@ -1,4 +1,4 @@
-#include "scheduler.h"
+#include "../include/scheduler.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -46,4 +46,20 @@ Process* dequeue(Queue *q) {                            // Eh return mo ang proc
 
 int is_empty(Queue *q) {
     return (q->front == NULL);
+}
+
+Process* peek(Queue *q) {
+    if (q->front == NULL) return NULL;
+    return q->front->process;
+}
+
+void print_queue(Queue *q) {
+    Node *temp = q->front;
+
+    printf("Queue: ");
+    while (temp != NULL) {
+        printf("%s ", temp->process->pid);
+        temp = temp->next;
+    }
+    printf("\n");
 }

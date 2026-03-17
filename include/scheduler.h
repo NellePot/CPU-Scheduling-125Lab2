@@ -9,7 +9,7 @@ typedef struct Node {
 } Node;
 
 typedef struct {
-    Node *front;
+    Node *front; 
     Node *rear;
 } Queue;
 
@@ -18,7 +18,8 @@ typedef struct {
     int num_processes;      
     int current_time;       
     int *gantt_chart;
-    int total_time;       
+    int total_time;  
+    Queue ready_queue;     
 } SchedulerState; 
 
 typedef struct {
@@ -40,6 +41,7 @@ void initialize_queue(Queue *q);
 void enqueue(Queue *q, Process *p);
 Process* dequeue(Queue *q);
 int is_empty(Queue *q);
+Process* peak(Queue *q);
 
 int schedule_fcfs(SchedulerState *state);
 int schedule_sjf(SchedulerState *state);
