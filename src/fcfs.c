@@ -2,49 +2,27 @@
 #include <stdio.h>
 
 int schedule_fcfs(SchedulerState *state) {
-    int t = 0;
+    int current_time = 0;
     int completed = 0;
-    Process *running_process = NULL;
-
-    Queue *ready_queue = &state->ready_queue;
-    initialize_queue(ready_queue);
 
     while (completed < state->num_processes) {
+        int idx = get_next_process(state, current_time, compare_fcfs);  // Get lang new process if wala pay ga run 
 
-        // enqueue processes that arrive at time t
-        for (int i = 0; i < state->num_processes; i++) {
-            if (state->processes[i].arrival_time == t) {
-                enqueue(ready_queue, &state->processes[i]);
+        if (idx != -1) {
+            Process *p = &state->processes[idx];
+            if (p->start_time == -1) p->start_time = current_time;
+
+            while (p->remaining_time > 0) {                         // Run until completion 
+                state->gantt_chart[current_time] = idx;
+                p->remaining_time--;
+                current_time++;
             }
-        }
-
-        // if CPU is idle, get next process
-        if (running_process == NULL && !is_empty(ready_queue)) {
-            running_process = dequeue(ready_queue);
-
-            if (running_process->start_time == -1) {
-                running_process->start_time = t;
-            }
-        }
-
-        // run current process for 1 time unit
-        if (running_process != NULL) {
-            state->gantt_chart[t] = running_process - state->processes;
-            running_process->remaining_time--;
-
-            if (running_process->remaining_time == 0) {
-                running_process->finish_time = t + 1;
-                completed++;
-                running_process = NULL;
-            }
+            p->finish_time = current_time;
+            completed++;
         } else {
-            // CPU idle
-            state->gantt_chart[t] = -1;
+            state->gantt_chart[current_time++] = -1;                // Idle
         }
-
-        t++;
     }
-
-    state->total_time = t;
+    state->total_time = current_time;
     return 0;
 }
