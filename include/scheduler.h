@@ -37,11 +37,19 @@ typedef struct {
     int last_boost;         // Last boost time
 } MLFQScheduler;
 
+typedef int (*CompareFunc)(Process*,Process*); 
+
 void initialize_queue(Queue *q);
 void enqueue(Queue *q, Process *p);
 Process* dequeue(Queue *q);
 int is_empty(Queue *q);
 Process* peak(Queue *q);
+
+int get_next_process(SchedulerState *state, int current_time, CompareFunc compare);
+int compare_fcfs(Process *a, Process *b); 
+int compare_sjf(Process *a, Process *b); 
+int compare_stcf(Process *a, Process *b); 
+void update_ready_queue(SchedulerState *state, int time); 
 
 int schedule_fcfs(SchedulerState *state);
 int schedule_sjf(SchedulerState *state);
@@ -51,6 +59,8 @@ int schedule_mlfq(SchedulerState *state, MLFQScheduler *config);
 void print_gantt_chart(SchedulerState *state);
 void calculate_metrics(Process *processes, int n);
 double calculate_average_turnaround(Process *processes, int n);
+double calculate_average_waiting(Process *processes, int n);
+double calculate_average_response(Process *processes, int n);
 void calculate_and_print_metrics(SchedulerState *state);
 
 #endif

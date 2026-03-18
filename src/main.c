@@ -6,6 +6,7 @@
 int main(int argc, char *argv[]) {
     char algorithm[10] = "";
     char input_file[100] = "";
+    int quantum = 30; // default
 
     // Parse algorithm
     for (int i = 1; i < argc; i++) {
@@ -13,11 +14,13 @@ int main(int argc, char *argv[]) {
             strcpy(algorithm, argv[i] + 12);
         } else if (strncmp(argv[i], "--input=", 8) == 0) {
             strcpy(input_file, argv[i] + 8);
+        } else if (strncmp(argv[i], "--quantum=", 10) == 0) {
+            quantum = atoi(argv[i] + 10);
         }
     }
 
     if (strlen(algorithm) == 0) {
-        printf("Please specify --algorithm=FCFS | SJF | STCF\n");
+        printf("Please specify --algorithm=FCFS | SJF | STCF | RR\n");
         return 1;
     }
 
@@ -46,7 +49,7 @@ int main(int argc, char *argv[]) {
     SchedulerState state;
     state.num_processes = n;
     state.processes = malloc(sizeof(Process) * n);
-    state.gantt_chart = malloc(sizeof(int) * 1000);
+    state.gantt_chart = malloc(sizeof(int) * 10000);
     state.current_time = 0;
     state.total_time = 0;
     initialize_queue(&state.ready_queue);
@@ -67,6 +70,7 @@ int main(int argc, char *argv[]) {
         state.processes[i].remaining_time = state.processes[i].burst_time;
         state.processes[i].start_time = -1;
         state.processes[i].finish_time = -1;
+        state.processes[i].in_ready_queue = 0;
     }
 
     fclose(fp);
@@ -78,6 +82,8 @@ int main(int argc, char *argv[]) {
         schedule_sjf(&state);
     } else if (strcmp(algorithm, "STCF") == 0) {
         schedule_stcf(&state);
+    } else if (strcmp(algorithm, "RR") == 0) {
+        schedule_rr(&state, quantum);
     } else {
         printf("Unknown algorithm!\n");
         free(state.processes);
