@@ -1,21 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "../include/scheduler.h"
 
 int main(int argc, char *argv[]) {
     char algorithm[10] = "";
     char input_file[100] = "";
     int quantum = 30; // default
+    char *endptr;
+    long q;
 
     // Parse algorithm
     for (int i = 1; i < argc; i++) {
         if (strncmp(argv[i], "--algorithm=", 12) == 0) {
-            strcpy(algorithm, argv[i] + 12);
+           snprintf(algorithm, sizeof(algorithm), "%s", argv[i] + 12); //fixed
         } else if (strncmp(argv[i], "--input=", 8) == 0) {
-            strcpy(input_file, argv[i] + 8);
-        } else if (strncmp(argv[i], "--quantum=", 10) == 0) {
-            quantum = atoi(argv[i] + 10);
+           snprintf(input_file, sizeof(input_file), "%s", argv[i] + 8); //fixed
+        } else if (strncmp(argv[i], "--quantum=", 10) == 0) {           //fixed
+            errno = 0;
+            q = strtol(argv[i] + 10, &endptr, 10);
+            if (errno != 0 || *endptr != '\0' || q <= 0) {
+                printf("Invalid quantum value\n");
+                return 1;
+            }
+            quantum = (int)q;
         }
     }
 
@@ -45,32 +54,79 @@ int main(int argc, char *argv[]) {
     }
     rewind(fp);
 
+    if (n <= 0) {
+        printf("No processes to schedule\n");
+        fclose(fp);
+        return 1;
+    }
+
     // Initialize state
     SchedulerState state;
     state.num_processes = n;
-    state.processes = malloc(sizeof(Process) * n);
-    state.gantt_chart = malloc(sizeof(int) * 10000);
+    state.processes = malloc(sizeof(Process) * n);                          
     state.current_time = 0;
     state.total_time = 0;
     initialize_queue(&state.ready_queue);
 
-    if (state.processes == NULL || state.gantt_chart == NULL) {
+    if (state.processes == NULL) {
         printf("Memory allocation failed\n");
         fclose(fp);
         return 1;
     }
 
-    // Read processes from file
-    for (int i = 0; i < n; i++) {
-        fscanf(fp, "%s %d %d",
-               state.processes[i].pid,
-               &state.processes[i].arrival_time,
-               &state.processes[i].burst_time);
+    memset(state.processes, 0, sizeof(Process) * n); // Initialize process array to zero
 
-        state.processes[i].remaining_time = state.processes[i].burst_time;
-        state.processes[i].start_time = -1;
-        state.processes[i].finish_time = -1;
-        state.processes[i].in_ready_queue = 0;
+    char line_buffer[100];
+    int i = 0;
+
+    while(i < n && fgets(line_buffer, sizeof(line_buffer), fp) != NULL) {
+        if (line_buffer[0] == '\n' || line_buffer[0] == '\0') {
+            continue;
+        }
+
+        if(sscanf(line_buffer, "%15s %d %d",                                    //fixed
+                state.processes[i].pid,
+                &state.processes[i].arrival_time,
+                &state.processes[i].burst_time) != 3) {
+            printf("Error reading process data from file\n");
+            free(state.processes);
+            fclose(fp);
+            return 1;
+        }
+
+            state.processes[i].remaining_time = state.processes[i].burst_time;
+            state.processes[i].start_time = -1;
+            state.processes[i].finish_time = -1;
+            state.processes[i].in_ready_queue = 0;
+            i++;
+        }
+
+        if (i != n) {
+            printf("Unexpected number of valid process lines\n");
+            destroy_queue(&state.ready_queue);
+            free(state.processes);
+            fclose(fp);
+            return 1;
+    }
+
+    int total_burst = 0;
+    int max_arrival = 0;
+
+    for (int i = 0; i < n; i++) {
+        total_burst += state.processes[i].burst_time;
+        if (state.processes[i].arrival_time > max_arrival) {
+            max_arrival = state.processes[i].arrival_time;
+        }
+    }
+
+    state.gantt_chart = malloc(sizeof(int) * (total_burst + max_arrival + 1));
+
+    if (state.gantt_chart == NULL) {
+        printf("Memory allocation failed\n");
+        destroy_queue(&state.ready_queue);
+        free(state.processes);
+        fclose(fp);
+        return 1;
     }
 
     fclose(fp);
@@ -83,9 +139,17 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(algorithm, "STCF") == 0) {
         schedule_stcf(&state);
     } else if (strcmp(algorithm, "RR") == 0) {
+        if (quantum <= 0) {
+            printf("Please specify a valid quantum for RR\n");
+            destroy_queue(&state.ready_queue);
+            free(state.processes);
+            free(state.gantt_chart);
+            return 1;
+        }
         schedule_rr(&state, quantum);
     } else {
         printf("Unknown algorithm!\n");
+        destroy_queue(&state.ready_queue);
         free(state.processes);
         free(state.gantt_chart);
         return 1;
@@ -96,6 +160,7 @@ int main(int argc, char *argv[]) {
     calculate_and_print_metrics(&state);
 
     // Free memory
+    destroy_queue(&state.ready_queue);
     free(state.processes);
     free(state.gantt_chart);
 

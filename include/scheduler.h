@@ -41,15 +41,17 @@ typedef int (*CompareFunc)(Process*,Process*);
 
 void initialize_queue(Queue *q);
 void enqueue(Queue *q, Process *p);
+void destroy_queue(Queue *q);
 Process* dequeue(Queue *q);
 int is_empty(Queue *q);
-Process* peak(Queue *q);
+Process* peek(Queue *q);   //fixed
+
 
 int get_next_process(SchedulerState *state, int current_time, CompareFunc compare);
 int compare_fcfs(Process *a, Process *b); 
 int compare_sjf(Process *a, Process *b); 
 int compare_stcf(Process *a, Process *b); 
-void update_ready_queue(SchedulerState *state, int time); 
+void update_ready_queue(SchedulerState *state, int time, Process *running_process); 
 
 int schedule_fcfs(SchedulerState *state);
 int schedule_sjf(SchedulerState *state);

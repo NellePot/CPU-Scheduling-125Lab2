@@ -65,6 +65,19 @@ void print_queue(Queue *q) {
     printf("\n");
 }
 
+void destroy_queue(Queue *q) {
+    Node *current = q->front;
+
+    while (current != NULL) {
+        Node *temp = current;
+        current = current->next;
+        free(temp);
+    }
+
+    q->front = NULL;
+    q->rear = NULL;
+}
+
 int get_next_process(SchedulerState *state, int current_time, CompareFunc compare) {
     int idx = -1;
     for (int i = 0; i < state->num_processes; i++) {
@@ -94,9 +107,12 @@ int compare_stcf(Process *a, Process *b) {                  // Pick the shortest
     return a->arrival_time - b->arrival_time; 
 }
 
-void update_ready_queue(SchedulerState *state, int time) {
+void update_ready_queue(SchedulerState *state, int time, Process *running_process) {     //Check for new arrivals and add to ready queue
     for (int i = 0; i < state->num_processes; i++) {
         Process *p = &state->processes[i];
+
+        if(p==running_process) continue;                                                 // skip the currently running process (fix)
+
         if (p->arrival_time <= time && p->remaining_time > 0 && !p->in_ready_queue) {
             enqueue(&state->ready_queue, p);
             p->in_ready_queue = 1;

@@ -16,6 +16,8 @@ void calculate_metrics(Process *processes, int n) {
 }
 
 double calculate_average_turnaround(Process *processes, int n) {
+    if (n<=0) return 0.0;                                                   // avoid division by zero (fix)
+
     double sum = 0.0;
     for (int i = 0; i < n; i++) {
         sum += processes[i].turnaround_time;
@@ -24,6 +26,8 @@ double calculate_average_turnaround(Process *processes, int n) {
 }
 
 double calculate_average_waiting(Process *processes, int n) {
+    if (n<=0) return 0.0;               
+                                        
     double sum = 0.0;
     for (int i = 0; i < n; i++) {
         sum += processes[i].waiting_time;
@@ -32,6 +36,8 @@ double calculate_average_waiting(Process *processes, int n) {
 }
 
 double calculate_average_response(Process *processes, int n) {
+    if (n<=0) return 0.0;               
+                                        
     double sum = 0.0;
     for (int i = 0; i < n; i++) {
         sum += processes[i].response_time;

@@ -3,6 +3,10 @@
 #include "../include/gantt.h"
 #include "../include/scheduler.h"
 
+#define TIME_SCALE 20
+#define MIN_DASHES 1
+#define BOX_PADDING 4
+
 void print_gantt_chart(SchedulerState *state) {
     (void)state;
     printf("\n=== Gantt Chart ===\n");
@@ -44,10 +48,10 @@ void print_gantt_chart(SchedulerState *state) {
         }
 
         // Calculate the same width used in the box above to align the numbers
-        int num_dashes = duration / 20;
-        if (num_dashes < 1) num_dashes = 1;
+        int num_dashes = duration / TIME_SCALE;
+        if (num_dashes < MIN_DASHES) num_dashes = MIN_DASHES;
         
-        int box_width = 2 + 2 + num_dashes; 
+        int box_width = BOX_PADDING + num_dashes; 
         
         for (int j = 0; j < box_width - 1; j++) printf(" ");
         printf("%d", i + duration);
