@@ -26,8 +26,11 @@ typedef struct {
     int level;              // Queue priority level (0 = highest)
     int time_quantum;       // Time slice for this queue (-1 for FCFS)
     int allotment;          // Max time before demotion (-1 for infinite)
-    Process *queue;         // Array or linked list of processes
+    Process **queue;         // Array or linked list of processes
     int size;               // Current queue size
+    int front;              // For circular queue implementation
+    int rear;               // For circular queue implementation
+    int capacity;           // Max capacity of the queue
 } MLFQQueue;
 
 typedef struct {
@@ -46,6 +49,20 @@ Process* dequeue(Queue *q);
 int is_empty(Queue *q);
 Process* peek(Queue *q);   //fixed
 
+void initialize_mlfq_queue(MLFQQueue *q, int level, int quantum, int allotment, int capacity);
+void enqueue_mlfq(MLFQQueue *q, Process *p);
+Process *dequeue_mlfq(MLFQQueue *q);
+int is_empty_mlfq(MLFQQueue *q);
+void destroy_mlfq_queue(MLFQQueue *q);
+
+void initialize_mlfq_scheduler(MLFQScheduler *mlfq, int num_queues, int boost_period, int capacity, int *quantums, int *allotments);
+void destroy_mlfq_scheduler(MLFQScheduler *mlfq);
+
+void add_new_arrivals_mlfq(SchedulerState *state, MLFQScheduler *mlfq);
+Process *get_next_mlfq_process(MLFQScheduler *mlfq);
+void priority_boost_mlfq(MLFQScheduler *mlfq, int current_time);
+int higher_priority_queue_has_job(MLFQScheduler *mlfq, int current_priority);
+
 
 int get_next_process(SchedulerState *state, int current_time, CompareFunc compare);
 int compare_fcfs(Process *a, Process *b); 
@@ -57,7 +74,7 @@ int schedule_fcfs(SchedulerState *state);
 int schedule_sjf(SchedulerState *state);
 int schedule_stcf(SchedulerState *state);
 int schedule_rr(SchedulerState *state, int quantum);
-int schedule_mlfq(SchedulerState *state, MLFQScheduler *config); 
+int schedule_mlfq(SchedulerState *state, const char *config_file);
 void print_gantt_chart(SchedulerState *state);
 void calculate_metrics(Process *processes, int n);
 double calculate_average_turnaround(Process *processes, int n);

@@ -11,9 +11,12 @@ typedef struct {
     int waiting_time;       // Time spent waiting
     int priority;           // For MLFQ
     int time_in_queue;      // For MLFQ allotment tracking
+    int in_ready_queue;     // Flag to avoid duplicates
     int turnaround_time;     // Total time from arrival to completion
     int response_time;       // Time from arrival to first execution
-    int in_ready_queue;     // Flag for RR to avoid duplicates
+    int quantum_used;       //Time used in current queue time slice (for MLFQ)
+    int admitted;            // Flag to track if process has been admitted to ready queue (for MLFQ)
+    int started;             // Flag to track if process has started execution (for MLFQ)
 } Process;
  
 #endif

@@ -5,8 +5,9 @@
 #include "../include/scheduler.h"
 
 int main(int argc, char *argv[]) {
-    char algorithm[10] = "";
+    char algorithm[20] = "";
     char input_file[100] = "";
+    char mlfq_config_file[100] = "";
     int quantum = 30; // default
     char *endptr;
     long q;
@@ -25,11 +26,13 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             quantum = (int)q;
+        } else if (strncmp(argv[i], "--mlfq-config=", 14) == 0) {
+            snprintf(mlfq_config_file, sizeof(mlfq_config_file), "%s", argv[i] + 14); 
         }
     }
 
     if (strlen(algorithm) == 0) {
-        printf("Please specify --algorithm=FCFS | SJF | STCF | RR\n");
+        printf("Please specify --algorithm=FCFS | SJF | STCF | RR | MLFQ\n");
         return 1;
     }
 
@@ -67,7 +70,7 @@ int main(int argc, char *argv[]) {
     state.current_time = 0;
     state.total_time = 0;
     initialize_queue(&state.ready_queue);
-
+    
     if (state.processes == NULL) {
         printf("Memory allocation failed\n");
         fclose(fp);
@@ -97,7 +100,18 @@ int main(int argc, char *argv[]) {
             state.processes[i].remaining_time = state.processes[i].burst_time;
             state.processes[i].start_time = -1;
             state.processes[i].finish_time = -1;
+            state.processes[i].waiting_time = 0;
+            state.processes[i].turnaround_time = 0;
+            state.processes[i].response_time = -1;
             state.processes[i].in_ready_queue = 0;
+             
+            //MLFQ-related initializations
+            state.processes[i].priority = 0;
+            state.processes[i].time_in_queue = 0;
+            state.processes[i].quantum_used = 0;
+            state.processes[i].admitted = 0;
+            state.processes[i].started = 0;
+
             i++;
         }
 
@@ -130,7 +144,8 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp);
-
+    printf("algorithm read = '%s'\n", algorithm);
+    printf("input file read = '%s'\n", input_file);
     // Select algorithm
     if (strcmp(algorithm, "FCFS") == 0) {
         schedule_fcfs(&state);
@@ -147,6 +162,21 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         schedule_rr(&state, quantum);
+    } else if (strcmp(algorithm, "MLFQ") == 0) {
+        if (strlen(mlfq_config_file) == 0) {
+            printf("Please specify --mlfq-config=filename\n");
+            destroy_queue(&state.ready_queue);
+            free(state.processes);
+            free(state.gantt_chart);
+            return 1;
+        }
+
+        if (schedule_mlfq(&state, mlfq_config_file) != 0) {
+            destroy_queue(&state.ready_queue);
+            free(state.processes);
+            free(state.gantt_chart);
+            return 1;
+        }
     } else {
         printf("Unknown algorithm!\n");
         destroy_queue(&state.ready_queue);
@@ -156,6 +186,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Output results
+
     print_gantt_chart(&state);
     calculate_and_print_metrics(&state);
 
