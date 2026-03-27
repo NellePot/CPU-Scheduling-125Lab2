@@ -7,7 +7,6 @@
    MLFQ QUEUE FUNCTIONS
    ========================= */
 
-// Bug 1 fixed: restored original signature for initialize_mlfq_queue
 void initialize_mlfq_queue(MLFQQueue *q, int level, int quantum, int allotment, int capacity) {
     q->level = level;
     q->time_quantum = quantum;
@@ -49,7 +48,6 @@ void destroy_mlfq_queue(MLFQQueue *q) {
    MLFQ SCHEDULER SETUP
    ========================= */
 
-// Bug 2 fixed: now accepts quantums[] and allotments[] arrays instead of hardcoding
 void initialize_mlfq_scheduler(MLFQScheduler *mlfq, int num_queues, int boost_period, int capacity, int *quantums, int *allotments) {
     mlfq->num_queues = num_queues;
     mlfq->boost_period = boost_period;
@@ -110,7 +108,6 @@ int higher_priority_queue_has_job(MLFQScheduler *mlfq, int current_priority) {
 }
 
 void priority_boost_mlfq(MLFQScheduler *mlfq, int current_time) {
-    // matches the manual's condition exactly
     if (current_time - mlfq->last_boost >= mlfq->boost_period) {
         for (int i = 1; i < mlfq->num_queues; i++) {
             while (!is_empty_mlfq(&mlfq->queues[i])) {
@@ -155,7 +152,6 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
     int quantums[10];
     int allotments[10];
 
-    // Bug 3 fixed: consistent variable name config_fp throughout
     FILE *config_fp = fopen(config_file, "r");
     if (config_fp == NULL) {
         printf("Error opening MLFQ config file: %s\n", config_file);
@@ -163,7 +159,7 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
     }
 
     char line[100];
-    int q_index = 0;  // Bug 3 fixed: was wrongly named 'q' before
+    int q_index = 0;  
 
     while (fgets(line, sizeof(line), config_fp)) {
         if (line[0] == '#' || line[0] == '\n') continue;
@@ -175,18 +171,17 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
             if (sscanf(line, "Q%d %d %d", &level, &quantum, &allotment) == 3) {
                 quantums[level] = quantum;
                 allotments[level] = allotment;
-                q_index++;  // Bug 3 fixed: was 'q++' before
+                q_index++;  
             }
         }
     }
-    num_queues = q_index;   // Bug 3 fixed: was 'q' before
-    fclose(config_fp);      // Bug 3 fixed: was 'fp' before
+    num_queues = q_index;   
+    fclose(config_fp);      
 
-    // Bug 2 fixed: now passes quantums[] and allotments[] from config file
     initialize_mlfq_scheduler(&mlfq, num_queues, boost_period,
                                state->num_processes, quantums, allotments);
 
-    // Reset all process state
+    // reset all process state
     for (int i = 0; i < state->num_processes; i++) {
         state->processes[i].remaining_time = state->processes[i].burst_time;
         state->processes[i].start_time = -1;
@@ -207,10 +202,11 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
 
     while (completed < state->num_processes) {
         add_new_arrivals_mlfq(state, &mlfq);
+        int boost_before = mlfq.last_boost; 
         priority_boost_mlfq(&mlfq, state->current_time);
 
         // also boost the currently running process if needed
-        if (running_process != NULL && running_process->priority > 0) {
+        if (mlfq.last_boost != boost_before && running_process != NULL && running_process->priority > 0) {
             running_process->priority = 0;
             running_process->time_in_queue = 0;
             running_process->quantum_used = 0;
@@ -230,12 +226,12 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
 
         Process *p = running_process;
 
-        // Bug 4 fixed: current_queue declared only once, after priority is finalized
+    
         MLFQQueue *current_queue = &mlfq.queues[p->priority];
 
         int index = (int)(p - state->processes);
 
-        // Record response time on first execution
+        // record response time on first execution
         if (p->started == 0) {
             p->start_time = state->current_time;
             p->response_time = p->start_time - p->arrival_time;
@@ -243,17 +239,16 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
         }
 
         state->gantt_chart[state->current_time] = index;
-
         p->remaining_time--;
         p->time_in_queue++;
         p->quantum_used++;
-
         state->current_time++;
         state->total_time++;
 
+        //check for new arrivals that just arrived
         add_new_arrivals_mlfq(state, &mlfq);
 
-        // Process finished
+        // process finished
         if (p->remaining_time == 0) {
             p->finish_time = state->current_time;
             p->turnaround_time = p->finish_time - p->arrival_time;
@@ -263,19 +258,19 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
             continue;
         }
 
-        // Allotment exhausted → demote
+        //if allotment exhausted, demote to lower queue
         if (current_queue->allotment != -1 &&
             p->time_in_queue >= current_queue->allotment) {
 
             mlfq_adjust_priority(&mlfq, p);
             running_process = NULL;
         }
-        // Higher priority job arrived → preempt
+        //preempt for higher priority job
         else if (higher_priority_queue_has_job(&mlfq, p->priority)) {
             enqueue_mlfq(&mlfq.queues[p->priority], p);
             running_process = NULL;
         }
-        // Quantum exhausted → requeue at same level
+        //quantum exhausted, requeue at same level
         else if (current_queue->time_quantum != -1 &&
                  p->quantum_used >= current_queue->time_quantum) {
 
@@ -283,7 +278,7 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
             enqueue_mlfq(&mlfq.queues[p->priority], p);
             running_process = NULL;
         }
-        // Keep running
+        // keep running
         else {
             running_process = p;
         }
