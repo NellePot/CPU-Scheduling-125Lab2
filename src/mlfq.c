@@ -323,6 +323,7 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
         }
     }
 
+    //based on manual
     if (!compare_mode) {
         printf("\n=== Analysis ===\n");
         printf("Interactive job (short burst) behavior:\n");
