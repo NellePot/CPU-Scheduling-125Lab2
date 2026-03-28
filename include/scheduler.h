@@ -75,11 +75,8 @@ int schedule_sjf(SchedulerState *state);
 int schedule_stcf(SchedulerState *state);
 int schedule_rr(SchedulerState *state, int quantum);
 int schedule_mlfq(SchedulerState *state, const char *config_file);
-void print_gantt_chart(SchedulerState *state);
-void calculate_metrics(Process *processes, int n);
-double calculate_average_turnaround(Process *processes, int n);
-double calculate_average_waiting(Process *processes, int n);
-double calculate_average_response(Process *processes, int n);
-void calculate_and_print_metrics(SchedulerState *state);
+
+void reset_state(SchedulerState *state); 
+void print_comparison_row(const char *name, SchedulerState *state); 
 
 #endif

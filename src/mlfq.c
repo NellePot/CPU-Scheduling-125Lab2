@@ -7,6 +7,8 @@
    MLFQ QUEUE FUNCTIONS
    ========================= */
 
+extern int compare_mode; 
+
 void initialize_mlfq_queue(MLFQQueue *q, int level, int quantum, int allotment, int capacity) {
     q->level = level;
     q->time_quantum = quantum;

@@ -1,6 +1,8 @@
 #include "../include/scheduler.h"
 #include <stdio.h>
 
+extern int compare_mode;
+
 int schedule_fcfs(SchedulerState *state) {
     int current_time = 0;
     int completed = 0;
@@ -21,10 +23,11 @@ int schedule_fcfs(SchedulerState *state) {
 
             int waiting = p->finish_time - p->arrival_time - p->burst_time;
              if (waiting > 0) {
-                printf("Convoy effect detected: Process %s waited %d time units\n",
-                       p->pid, waiting);
+                if(!compare_mode) {
+                    printf("Convoy effect detected: Process %s waited %d time units\n",
+                        p->pid, waiting);
+                }
             }
-
             completed++;
         } else {
             state->gantt_chart[current_time++] = -1;                // Idle

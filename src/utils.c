@@ -119,3 +119,39 @@ void update_ready_queue(SchedulerState *state, int time, Process *running_proces
         }
     }
 } 
+
+//helper function 
+void reset_state(SchedulerState *state) {
+    state->current_time = 0;
+    state->total_time = 0;
+    for (int i = 0; i < state->num_processes; i++) {
+        state->processes[i].remaining_time  = state->processes[i].burst_time;
+        state->processes[i].start_time      = -1;
+        state->processes[i].finish_time     = -1;
+        state->processes[i].waiting_time    = 0;
+        state->processes[i].turnaround_time = 0;
+        state->processes[i].response_time   = -1;
+        state->processes[i].in_ready_queue  = 0;
+        state->processes[i].priority        = 0;
+        state->processes[i].time_in_queue   = 0;
+        state->processes[i].quantum_used    = 0;
+        state->processes[i].admitted        = 0;
+        state->processes[i].started         = 0;
+    }
+    initialize_queue(&state->ready_queue);
+}
+ 
+void print_comparison_row(const char *name, SchedulerState *state) {
+    double avg_tt = 0, avg_wt = 0, avg_rt = 0;
+    for (int i = 0; i < state->num_processes; i++) {
+        avg_tt += state->processes[i].turnaround_time;
+        avg_wt += state->processes[i].waiting_time;
+        avg_rt += state->processes[i].response_time;
+    }
+    avg_tt /= state->num_processes;
+    avg_wt /= state->num_processes;
+    avg_rt /= state->num_processes;
+    printf("%-10s | %6.1f | %6.1f | %6.1f\n",
+           name, avg_tt, avg_wt, avg_rt);
+}
+

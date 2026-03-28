@@ -1,6 +1,8 @@
 #include "../include/scheduler.h"
 #include <stdio.h>
 
+extern int compare_mode;
+
 int schedule_rr(SchedulerState *state, int quantum) {
     state->current_time = 0;
     int completed = 0;
@@ -42,8 +44,9 @@ int schedule_rr(SchedulerState *state, int quantum) {
             state->current_time++;
         }
     }
-
-    printf("Total context switches: %d\n", context_switch);
+    if(!compare_mode){
+        printf("Total context switches: %d\n", context_switch);
+    }
     state->total_time = state->current_time;
     return 0;
 }

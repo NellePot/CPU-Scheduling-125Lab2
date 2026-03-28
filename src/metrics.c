@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "../include/scheduler.h"
+#include "../include/metrics.h"
 
 void calculate_and_print_metrics(SchedulerState *state) {
     int n = state->num_processes;
