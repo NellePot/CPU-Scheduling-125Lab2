@@ -4,6 +4,7 @@
 int schedule_rr(SchedulerState *state, int quantum) {
     state->current_time = 0;
     int completed = 0;
+    int context_switch = 0;
     Queue *ready_queue = &state->ready_queue;
     initialize_queue(ready_queue);
 
@@ -32,6 +33,7 @@ int schedule_rr(SchedulerState *state, int quantum) {
                 p->finish_time = state->current_time;
                 completed++;
             } else {
+                context_switch++;
                 enqueue(&state->ready_queue, p);
                 p->in_ready_queue = 1;                          //process is enqueued (fix)
             }
@@ -40,6 +42,8 @@ int schedule_rr(SchedulerState *state, int quantum) {
             state->current_time++;
         }
     }
+
+    printf("Total context switches: %d\n", context_switch);
     state->total_time = state->current_time;
     return 0;
 }

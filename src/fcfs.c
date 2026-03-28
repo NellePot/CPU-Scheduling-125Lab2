@@ -18,6 +18,13 @@ int schedule_fcfs(SchedulerState *state) {
                 current_time++;
             }
             p->finish_time = current_time;
+
+            int waiting = p->finish_time - p->arrival_time - p->burst_time;
+             if (waiting > 0) {
+                printf("Convoy effect detected: Process %s waited %d time units\n",
+                       p->pid, waiting);
+            }
+
             completed++;
         } else {
             state->gantt_chart[current_time++] = -1;                // Idle
