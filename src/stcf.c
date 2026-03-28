@@ -15,6 +15,7 @@ int schedule_stcf(SchedulerState *state) {
             Process *p = &state->processes[idx];
 
             if (last_idx != -1 && last_idx != idx) {
+                state->context_switches++; 
                 if (!compare_mode){ // Preemption occurred
                     printf("Process %s was preempted at t=%d (remaining: %d)\n",
                         state->processes[last_idx].pid, current_time, 
@@ -40,6 +41,8 @@ int schedule_stcf(SchedulerState *state) {
                 p->finish_time = current_time;
                 completed++;
             }
+
+
         } else {                                                                      //idle
             state->gantt_chart[current_time++] = -1;
             last_idx = -1; // Reset last_idx during idle to avoid incorrect preemption logs when a process starts after idle

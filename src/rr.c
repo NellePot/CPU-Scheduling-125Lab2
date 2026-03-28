@@ -47,6 +47,7 @@ int schedule_rr(SchedulerState *state, int quantum) {
     if(!compare_mode){
         printf("Total context switches: %d\n", context_switch);
     }
+    state->context_switches = context_switch;
     state->total_time = state->current_time;
     return 0;
 }

@@ -212,6 +212,7 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
             running_process->priority = 0;
             running_process->time_in_queue = 0;
             running_process->quantum_used = 0;
+            state->context_switches++;
         }
 
         if (running_process == NULL) {
@@ -263,19 +264,22 @@ int schedule_mlfq(SchedulerState *state, const char *config_file) {
         //if allotment exhausted, demote to lower queue
         if (current_queue->allotment != -1 &&
             p->time_in_queue >= current_queue->allotment) {
-
+            
+            state->context_switches++; 
             mlfq_adjust_priority(&mlfq, p);
             running_process = NULL;
         }
         //preempt for higher priority job
         else if (higher_priority_queue_has_job(&mlfq, p->priority)) {
+            state->context_switches++;  
             enqueue_mlfq(&mlfq.queues[p->priority], p);
             running_process = NULL;
         }
         //quantum exhausted, requeue at same level
         else if (current_queue->time_quantum != -1 &&
                  p->quantum_used >= current_queue->time_quantum) {
-
+            
+            state->context_switches++;  
             p->quantum_used = 0;
             enqueue_mlfq(&mlfq.queues[p->priority], p);
             running_process = NULL;

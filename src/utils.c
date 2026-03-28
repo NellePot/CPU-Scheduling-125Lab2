@@ -124,6 +124,7 @@ void update_ready_queue(SchedulerState *state, int time, Process *running_proces
 void reset_state(SchedulerState *state) {
     state->current_time = 0;
     state->total_time = 0;
+    state->context_switches = 0;
     for (int i = 0; i < state->num_processes; i++) {
         state->processes[i].remaining_time  = state->processes[i].burst_time;
         state->processes[i].start_time      = -1;
@@ -151,7 +152,7 @@ void print_comparison_row(const char *name, SchedulerState *state) {
     avg_tt /= state->num_processes;
     avg_wt /= state->num_processes;
     avg_rt /= state->num_processes;
-    printf("%-10s | %6.1f | %6.1f | %6.1f\n",
-           name, avg_tt, avg_wt, avg_rt);
+    printf("%-10s | %6.1f | %6.1f | %6.1f | %6d\n",
+           name, avg_tt, avg_wt, avg_rt, state->context_switches);
 }
 

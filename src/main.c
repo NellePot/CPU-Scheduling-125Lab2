@@ -157,9 +157,9 @@ int main(int argc, char *argv[]) {
 
     if(compare_mode){
        printf("\n=== Algorithm Comparison for %s ===\n", input_file);
-        printf("%-10s | %6s | %6s | %6s\n",
-            "Algorithm", "Avg TT", "Avg WT", "Avg RT");
-         printf("-----------|--------|--------|--------\n");
+        printf("%-10s | %6s | %6s | %6s | %6s\n",
+            "Algorithm", "Avg TT", "Avg WT", "Avg RT", "Ctx Sw");
+         printf("-----------|--------|--------|--------|--------\n");
     
     // FCFS
     memcpy(state.processes, original_processes, sizeof(Process) * n);

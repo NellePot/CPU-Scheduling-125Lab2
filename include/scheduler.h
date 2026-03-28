@@ -19,6 +19,7 @@ typedef struct {
     int current_time;       
     int *gantt_chart;
     int total_time;  
+    int context_switches; 
     Queue ready_queue;     
 } SchedulerState; 
 
