@@ -134,22 +134,16 @@ void priority_boost_mlfq(MLFQScheduler *mlfq, int current_time) {
 }
 
 void mlfq_adjust_priority(MLFQScheduler *mlfq, Process *p, int current_time) {
-    MLFQQueue *current_queue = &mlfq->queues[p->priority];
-
-    if (current_queue->allotment != -1 &&
-        p->time_in_queue >= current_queue->allotment) {
-
-        if (p->priority < mlfq->num_queues - 1) {
-            if (!compare_mode) {
-                printf("t=%d:\tProcess %s -> Q%d (exhausted Q%d allotment)\n",
-                       current_time, p->pid,
-                       p->priority + 1, p->priority);
-            }
-            p->priority++;
-            p->time_in_queue = 0;
-            p->quantum_used = 0;
-            enqueue_mlfq(&mlfq->queues[p->priority], p);
+    if (p->priority < mlfq->num_queues - 1) {
+        if (!compare_mode) {
+            printf("t=%d:\tProcess %s -> Q%d (exhausted Q%d allotment)\n",
+                    current_time, p->pid,
+                    p->priority + 1, p->priority);
         }
+        p->priority++;
+        p->time_in_queue = 0;
+        p->quantum_used = 0;
+        enqueue_mlfq(&mlfq->queues[p->priority], p);
     }
 }
 
