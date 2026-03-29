@@ -70,5 +70,27 @@ MLFQ, config file:
         -Q2 -1 -1(FCFS at low prio)
     run:
       ./schedism --algorithm=MLFQ --input=src/input.txt --mlfq-config=mlfq.conf 
+COMPARATIVE ANALYSIS: 
+
+    >./schedism --compare --input=tests/workload1.txt --quantum=30 --mlfq-config=src/mlfq_config.txt
+
+## Proof of Functionality
+FCFS: 
+    <img width="1212" height="381" alt="fcfs" src="https://github.com/user-attachments/assets/9ce415b4-f739-4f04-89b2-d369d32d2601" />
+SJF: 
+    <img width="1387" height="716" alt="sjf" src="https://github.com/user-attachments/assets/e8713fd9-1a6b-46c5-a008-8072f28c05a7" />
+STCF:
+    <img width="1221" height="575" alt="stcf" src="https://github.com/user-attachments/assets/90ae0064-ea74-49b4-b64d-d05613621058" />
+RR:
+    <img width="1317" height="352" alt="rr" src="https://github.com/user-attachments/assets/407bfdc9-8a6b-484d-b3ab-6fe43119902e" />
+MLFQ: 
+    <img width="1644" height="846" alt="mlfq1" src="https://github.com/user-attachments/assets/1bea1c39-0b51-47fd-be92-82d67a05dfee" />
+    <img width="1849" height="997" alt="mlfq2" src="https://github.com/user-attachments/assets/8fc43feb-a914-4f66-a299-d29bb7e5a841" />
+COMPARATIVE ANALYSIS: 
+    <img width="1837" height="265" alt="compare" src="https://github.com/user-attachments/assets/19df8609-3f05-4af0-af9b-de10598eb780" />
+
+
+
+
 
 
